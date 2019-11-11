@@ -15,29 +15,25 @@ ostream& operator<<(ostream& ost, compl const & val)
 
 int main()
 {
-	size_t const size = 1;
-	auto dp_val1 = dp_make_unique<compl[]>(size);
-	auto dp_val2 = dp_make_unique<compl[]>(size);
-	auto dp_res = dp_make_unique<compl[]>(size);
+	// run tests
+	auto dp_testsRes = dp_make_unique<bool[]>(testsCount);
+	auto hp_testsRes = make_unique<bool[]>(testsCount);
+	run_tests(dp_testsRes.get());
+	CUDA_CHECK(cudaMemcpy(hp_testsRes.get(), dp_testsRes.get(), testsCount * sizeof(bool), cudaMemcpyDeviceToHost));
 
+	bool success = true;
+	for (size_t i = 0; i < testsCount; ++i)
+	{
+		bool const res = hp_testsRes.get()[i];
 
-	auto hp_val1 = make_unique<compl[]>(size);
-	auto hp_val2 = make_unique<compl[]>(size);
-	auto hp_res = make_unique<compl[]>(size);
+		success = success && res;
+		cout << "Test " << i << " success: " << boolalpha << res << endl;
+	}
 
-	hp_val1.get()[0] = compl("1.2345678'9abcdeff'343");
-	hp_val2.get()[0] = compl(2.0);
+	
+	cout << endl;
+	cout << "All tests success = " << boolalpha << success << endl;
 
-	CUDA_CHECK(cudaMemcpy(dp_val1.get(), hp_val1.get(), size * sizeof(compl), cudaMemcpyHostToDevice));
-	CUDA_CHECK(cudaMemcpy(dp_val2.get(), hp_val2.get(), size * sizeof(compl), cudaMemcpyHostToDevice));
-
-
-	run_kernel(dp_val1.get(), dp_val2.get(), dp_res.get(), size);
-
-	CUDA_CHECK(cudaMemcpy(hp_res.get(), dp_res.get(), size * sizeof(compl), cudaMemcpyDeviceToHost));
-
-	cout << "devie: " << hp_res.get()[0] << endl;
-	cout << "host:  " << hp_val1.get()[0] * hp_val2.get()[0] << endl;
 
 	return 0;
 }

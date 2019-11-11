@@ -7,4 +7,5 @@ using Fixed = FixedPointValue<3>;
 
 using compl = pfc::complex<Fixed>;
 
-void run_kernel(compl const dp_val1[], compl const dp_val2[], compl dp_res[], size_t const size);
+size_t const testsCount = 20;
+void run_tests(bool dp_res[]);
